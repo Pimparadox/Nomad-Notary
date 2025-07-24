@@ -1,62 +1,126 @@
-<!-- services.html (updated to fix service descriptions and navigation loop) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Select Notary Service</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .service-option {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      margin: 15px auto;
+      padding: 20px;
+      max-width: 700px;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+      transition: all 0.3s ease;
+    }
+    .service-option:hover {
+      background: #f0f0f0;
+    }
+    .service-description {
+      display: none;
+      margin-top: 10px;
+    }
+    .active .service-description {
+      display: block;
+    }
+    .buttons {
+      margin-top: 10px;
+    }
+    .buttons button {
+      margin-right: 10px;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      background: #007bff;
+      color: #fff;
+      cursor: pointer;
+    }
+    .buttons button.cancel {
+      background: #dc3545;
+    }
+  </style>
 </head>
 <body>
   <h1>Select a Notary Service</h1>
-  <div class="service-container">
-    <!-- Sample Service Option -->
-    <div class="service-option" onclick="selectService('oaths')">
-      <h2>Administering Oaths and Affirmations</h2>
-      <div class="service-description">
-        This involves having a person pledge that the contents of a document or a statement are truthful.
-      </div>
-    </div>
-
-    <div class="service-option" onclick="selectService('acknowledgments')">
-      <h2>Taking Acknowledgments</h2>
-      <div class="service-description">
-        Witnessing a signature and verifying the signer's identity, ensuring they signed voluntarily and understand the document's nature.
-      </div>
-    </div>
-
-    <!-- Add more services here following the same format -->
-  </div>
-
-  <div id="confirmBox" class="confirm-box hidden">
-    <p id="confirmText"></p>
-    <button onclick="proceedToCalendar()">Confirm</button>
-    <button onclick="cancelSelection()">Cancel</button>
-  </div>
+  <div id="services-container"></div>
 
   <script>
-    let selectedService = '';
+    const services = [
+      {
+        title: "Administering Oaths and Affirmations",
+        description: "Having a person pledge that a statement or document is truthful."
+      },
+      {
+        title: "Taking Acknowledgments",
+        description: "Witnessing a signature and verifying the signer's identity."
+      },
+      {
+        title: "Attesting to Photocopies",
+        description: "Certifying that a photocopy is a true copy of the original."
+      },
+      {
+        title: "Solemnizing Marriages",
+        description: "Perform marriage ceremonies with a valid license."
+      },
+      {
+        title: "Verifying Vehicle Identification Numbers (VINs)",
+        description: "Certify a VIN to the DMV for vehicles not registered in Florida."
+      },
+      {
+        title: "Certifying Safe Deposit Box Contents",
+        description: "Witness and inventory the contents of a safe deposit box."
+      },
+      {
+        title: "Loan Signing Agent Services",
+        description: "Trained in notarizing loan and real estate documents."
+      },
+      {
+        title: "Remote Online Notarization (RON)",
+        description: "Use audio-video tech to perform notarizations remotely."
+      }
+    ];
 
-    const serviceDescriptions = {
-      oaths: 'Administering Oaths and Affirmations: This involves having a person pledge that the contents of a document or a statement are truthful.',
-      acknowledgments: 'Taking Acknowledgments: Witnessing a signature and verifying the signer\'s identity, ensuring they signed voluntarily and understand the document\'s nature.'
-      // Add the rest of your service keys and descriptions here
-    };
+    const container = document.getElementById('services-container');
 
-    function selectService(serviceKey) {
-      selectedService = serviceKey;
-      document.getElementById('confirmText').innerText = `You selected: ${serviceDescriptions[serviceKey]}`;
-      document.getElementById('confirmBox').classList.remove('hidden');
+    services.forEach((service, index) => {
+      const box = document.createElement('div');
+      box.classList.add('service-option');
+      box.innerHTML = `
+        <strong>${service.title}</strong>
+        <div class="service-description">
+          <p>${service.description}</p>
+          <div class="buttons">
+            <button onclick="confirmService('${service.title}')">Confirm</button>
+            <button class="cancel" onclick="cancelService()">Cancel</button>
+          </div>
+        </div>
+      `;
+      box.addEventListener('click', function () {
+        document.querySelectorAll('.service-option').forEach(el => el.classList.remove('active'));
+        box.classList.add('active');
+      });
+      container.appendChild(box);
+    });
+
+    function confirmService(serviceTitle) {
+      localStorage.setItem('selectedService', serviceTitle);
+      window.location.href = 'index.html';
     }
 
-    function proceedToCalendar() {
-      localStorage.setItem('selectedService', selectedService);
-      window.location.href = 'index.html'; // or wherever your calendar page lives
-    }
-
-    function cancelSelection() {
-      selectedService = '';
-      document.getElementById('confirmBox').classList.add('hidden');
+    function cancelService() {
+      window.location.href = 'index.html';
     }
   </script>
 </body>
