@@ -103,25 +103,30 @@
           <p>${service.description}</p>
           <div class="buttons">
             <button onclick="confirmService('${service.title}')">Confirm</button>
-            <button class="cancel" onclick="cancelService()">Cancel</button>
+            <button class="cancel" onclick="cancelService(event, this)">Cancel</button>
           </div>
         </div>
       `;
-      box.addEventListener('click', function () {
-        document.querySelectorAll('.service-option').forEach(el => el.classList.remove('active'));
-        box.classList.add('active');
+      box.addEventListener('click', function (e) {
+        if (!e.target.closest('button')) {
+          document.querySelectorAll('.service-option').forEach(el => el.classList.remove('active'));
+          box.classList.add('active');
+        }
       });
       container.appendChild(box);
     });
 
     function confirmService(serviceTitle) {
       localStorage.setItem('selectedService', serviceTitle);
-      window.location.href = 'index.html';
+      window.location.href = 'calendar.html';
     }
 
-    function cancelService() {
-      window.location.href = 'index.html';
+    function cancelService(event, button) {
+      event.stopPropagation();
+      const serviceBox = button.closest('.service-option');
+      serviceBox.classList.remove('active');
     }
   </script>
 </body>
 </html>
+
