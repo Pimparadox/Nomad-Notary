@@ -2,138 +2,135 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Select Date & Time</title>
   <link rel="stylesheet" href="style.css">
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f9f9f9;
+      background: #f2f2f2;
       padding: 20px;
     }
-
     h1 {
       text-align: center;
     }
-
-    #calendar-container {
-      max-width: 600px;
+    .calendar-container {
+      max-width: 700px;
       margin: 0 auto;
-      text-align: center;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-
-    #date-picker {
-      margin: 20px 0;
+    input[type="date"] {
       padding: 10px;
       font-size: 16px;
+      width: 100%;
+      margin-bottom: 20px;
     }
-
     .time-slots {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
       gap: 10px;
     }
-
     .time-slot {
-      padding: 10px 15px;
+      padding: 10px;
+      background: #e0e0e0;
+      border-radius: 5px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .time-slot.selected {
       background: #007bff;
       color: white;
-      border-radius: 5px;
-      cursor: pointer;
     }
-
-    .time-slot:hover {
-      background: #0056b3;
-    }
-
-    .booked {
+    .time-slot.booked {
       background: #ccc;
+      color: #666;
       cursor: not-allowed;
     }
-
-    #confirm-btn {
+    .confirm-button {
       margin-top: 20px;
       padding: 12px 20px;
       font-size: 16px;
-      border: none;
-      background: green;
+      background-color: #28a745;
       color: white;
-      border-radius: 6px;
+      border: none;
+      border-radius: 5px;
       cursor: pointer;
-      display: none;
+      width: 100%;
+    }
+    .confirm-button:disabled {
+      background-color: #aaa;
     }
   </style>
 </head>
 <body>
-
-  <h1>Select Appointment Date & Time</h1>
-  <div id="calendar-container">
-    <input type="date" id="date-picker" />
-    <div id="selected-date-display"></div>
-    <div class="time-slots" id="slots-container"></div>
-    <button id="confirm-btn" onclick="confirmBooking()">Confirm Appointment</button>
+  <h1>Choose Your Appointment Date & Time</h1>
+  <div class="calendar-container">
+    <input type="date" id="appointment-date">
+    <div class="time-slots" id="time-slots"></div>
+    <button id="confirm-btn" class="confirm-button" disabled>Confirm Appointment</button>
   </div>
 
   <script>
-    const timeSlots = [
-      "08:00 AM", "08:30 AM", "09:00 AM", "09:30 AM",
-      "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
-      "12:00 PM", "12:30 PM", "01:00 PM", "01:30 PM",
-      "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM",
-      "04:00 PM", "04:30 PM", "05:00 PM"
-    ];
-
-    let selectedDate = null;
+    const timeSlotsContainer = document.getElementById("time-slots");
+    const confirmBtn = document.getElementById("confirm-btn");
+    const dateInput = document.getElementById("appointment-date");
     let selectedTime = null;
-    const slotsContainer = document.getElementById('slots-container');
-    const confirmBtn = document.getElementById('confirm-btn');
+    let selectedDate = null;
 
-    const bookedSlots = JSON.parse(localStorage.getItem('bookedSlots') || '{}');
+    const generateTimeSlots = () => {
+      const times = [];
+      for (let hour = 8; hour < 17; hour++) {
+        times.push(`${hour.toString().padStart(2, '0')}:00`);
+        times.push(`${hour.toString().padStart(2, '0')}:30`);
+      }
+      return times;
+    };
 
-    document.getElementById('date-picker').addEventListener('change', function () {
-      selectedDate = this.value;
-      selectedTime = null;
-      document.getElementById('selected-date-display').textContent = `Available Times for ${selectedDate}`;
-      renderTimeSlots(selectedDate);
-      confirmBtn.style.display = 'none';
-    });
+    const bookedSlots = JSON.parse(localStorage.getItem("bookedAppointments")) || {}; // {"2025-07-26": ["08:00"]}
 
     function renderTimeSlots(date) {
-      slotsContainer.innerHTML = '';
-      timeSlots.forEach(slot => {
-        const slotBtn = document.createElement('div');
-        slotBtn.className = 'time-slot';
-        slotBtn.textContent = slot;
+      timeSlotsContainer.innerHTML = "";
+      const slots = generateTimeSlots();
+      slots.forEach(time => {
+        const div = document.createElement("div");
+        div.className = "time-slot";
+        div.innerText = time;
 
-        if (bookedSlots[date] && bookedSlots[date].includes(slot)) {
-          slotBtn.classList.add('booked');
+        if (bookedSlots[date] && bookedSlots[date].includes(time)) {
+          div.classList.add("booked");
         } else {
-          slotBtn.onclick = () => {
-            document.querySelectorAll('.time-slot').forEach(el => el.classList.remove('selected'));
-            slotBtn.classList.add('selected');
-            selectedTime = slot;
-            confirmBtn.style.display = 'inline-block';
-          };
+          div.addEventListener("click", () => {
+            document.querySelectorAll(".time-slot").forEach(el => el.classList.remove("selected"));
+            div.classList.add("selected");
+            selectedTime = time;
+            selectedDate = date;
+            confirmBtn.disabled = false;
+          });
         }
 
-        slotsContainer.appendChild(slotBtn);
+        timeSlotsContainer.appendChild(div);
       });
     }
 
-    function confirmBooking() {
-      if (!selectedDate || !selectedTime) return alert("Please select both a date and time.");
+    dateInput.addEventListener("change", e => {
+      selectedDate = e.target.value;
+      selectedTime = null;
+      confirmBtn.disabled = true;
+      renderTimeSlots(selectedDate);
+    });
 
-      const booked = JSON.parse(localStorage.getItem('bookedSlots') || '{}');
-      if (!booked[selectedDate]) booked[selectedDate] = [];
-      booked[selectedDate].push(selectedTime);
-      localStorage.setItem('bookedSlots', JSON.stringify(booked));
-
-      localStorage.setItem('selectedDate', selectedDate);
-      localStorage.setItem('selectedTime', selectedTime);
-
-      window.location.href = 'confirmation.html';
-    }
+    confirmBtn.addEventListener("click", () => {
+      if (!bookedSlots[selectedDate]) bookedSlots[selectedDate] = [];
+      bookedSlots[selectedDate].push(selectedTime);
+      localStorage.setItem("bookedAppointments", JSON.stringify(bookedSlots));
+      localStorage.setItem("selectedDateTime", JSON.stringify({ date: selectedDate, time: selectedTime }));
+      alert(`Appointment confirmed for ${selectedDate} at ${selectedTime}`);
+      window.location.href = "index.html";
+    });
   </script>
-
 </body>
 </html>
