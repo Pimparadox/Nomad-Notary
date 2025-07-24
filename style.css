@@ -1,0 +1,19 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  background-color: #f4f4f4;
+}
+h1, h2 {
+  color: #333;
+}
+a {
+  display: block;
+  margin-top: 10px;
+}
+.service {
+  background: #fff;
+  margin: 10px 0;
+  padding: 15px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}

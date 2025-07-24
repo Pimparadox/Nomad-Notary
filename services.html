@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Select Notary Service</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h2>Select a Notary Service</h2>
+  <div class="service" onclick="selectService('Oaths')">Administering Oaths and Affirmations</div>
+  <div class="service" onclick="selectService('Acknowledgments')">Taking Acknowledgments</div>
+  <div class="service" onclick="selectService('Photocopies')">Attesting to Photocopies</div>
+  <div class="service" onclick="selectService('Marriages')">Solemnizing Marriages</div>
+  <div class="service" onclick="selectService('VIN')">Verifying VINs</div>
+  <div class="service" onclick="selectService('Safe Deposit')">Safe Deposit Box Certification</div>
+  <div class="service" onclick="selectService('Loan Signing')">Loan Signing Agent</div>
+  <div class="service" onclick="selectService('RON')">Remote Online Notarization</div>
+  <script>
+    function selectService(service) {
+      alert("You selected: " + service);
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>
