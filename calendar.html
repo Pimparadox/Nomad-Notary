@@ -1,123 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Book Appointment</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <title>Select Date & Time</title>
+  <link rel="stylesheet" href="style.css">
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f4f4f4;
+      background: #f9f9f9;
       padding: 20px;
     }
 
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    h2 {
+    h1 {
       text-align: center;
     }
 
-    .form-group {
-      margin-bottom: 15px;
+    #calendar-container {
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: center;
     }
 
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-    }
-
-    .form-group input,
-    .form-group textarea,
-    .form-group select {
-      width: 100%;
+    #date-picker {
+      margin: 20px 0;
       padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+      font-size: 16px;
     }
 
-    button {
-      padding: 10px 20px;
-      background: #28a745;
+    .time-slots {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .time-slot {
+      padding: 10px 15px;
+      background: #007bff;
       color: white;
-      border: none;
-      border-radius: 6px;
+      border-radius: 5px;
       cursor: pointer;
     }
 
-    .back {
-      background: #6c757d;
-      margin-top: 10px;
+    .time-slot:hover {
+      background: #0056b3;
+    }
+
+    .booked {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    #confirm-btn {
+      margin-top: 20px;
+      padding: 12px 20px;
+      font-size: 16px;
+      border: none;
+      background: green;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      display: none;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Book Appointment</h2>
-    <p><strong>Selected Service:</strong> <span id="selectedService"></span></p>
 
-    <form id="bookingForm">
-      <div class="form-group">
-        <label for="appointmentDate">Select Date:</label>
-        <input type="date" id="appointmentDate" name="date" required />
-      </div>
-      <div class="form-group">
-        <label for="name">Full Name:</label>
-        <input type="text" id="name" required />
-      </div>
-      <div class="form-group">
-        <label for="phone">Phone Number:</label>
-        <input type="tel" id="phone" required />
-      </div>
-      <div class="form-group">
-        <label for="email">Email Address:</label>
-        <input type="email" id="email" required />
-      </div>
-      <div class="form-group">
-        <label for="notes">Additional Notes:</label>
-        <textarea id="notes" rows="4"></textarea>
-      </div>
-      <button type="submit">Confirm Booking</button>
-    </form>
-
-    <button class="back" onclick="window.location.href='services.html'">Go Back</button>
+  <h1>Select Appointment Date & Time</h1>
+  <div id="calendar-container">
+    <input type="date" id="date-picker" />
+    <div id="selected-date-display"></div>
+    <div class="time-slots" id="slots-container"></div>
+    <button id="confirm-btn" onclick="confirmBooking()">Confirm Appointment</button>
   </div>
 
   <script>
-    // Load selected service from localStorage
-    document.getElementById('selectedService').textContent =
-      localStorage.getItem('selectedService') || 'None selected';
+    const timeSlots = [
+      "08:00 AM", "08:30 AM", "09:00 AM", "09:30 AM",
+      "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
+      "12:00 PM", "12:30 PM", "01:00 PM", "01:30 PM",
+      "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM",
+      "04:00 PM", "04:30 PM", "05:00 PM"
+    ];
 
-    // Handle form submission
-    document.getElementById('bookingForm').addEventListener('submit', function(e) {
-      e.preventDefault();
+    let selectedDate = null;
+    let selectedTime = null;
+    const slotsContainer = document.getElementById('slots-container');
+    const confirmBtn = document.getElementById('confirm-btn');
 
-      const bookingDetails = {
-        service: localStorage.getItem('selectedService'),
-        date: document.getElementById('appointmentDate').value,
-        name: document.getElementById('name').value,
-        phone: document.getElementById('phone').value,
-        email: document.getElementById('email').value,
-        notes: document.getElementById('notes').value
-      };
+    const bookedSlots = JSON.parse(localStorage.getItem('bookedSlots') || '{}');
 
-      console.log('Booking submitted:', bookingDetails);
-
-      // Here, you'd typically send bookingDetails to a backend or third-party booking system
-
-      alert('Booking submitted! You will receive a confirmation email and text shortly.');
-
-      // Optionally redirect or clear form
-      document.getElementById('bookingForm').reset();
-      window.location.href = 'index.html';
+    document.getElementById('date-picker').addEventListener('change', function () {
+      selectedDate = this.value;
+      selectedTime = null;
+      document.getElementById('selected-date-display').textContent = `Available Times for ${selectedDate}`;
+      renderTimeSlots(selectedDate);
+      confirmBtn.style.display = 'none';
     });
+
+    function renderTimeSlots(date) {
+      slotsContainer.innerHTML = '';
+      timeSlots.forEach(slot => {
+        const slotBtn = document.createElement('div');
+        slotBtn.className = 'time-slot';
+        slotBtn.textContent = slot;
+
+        if (bookedSlots[date] && bookedSlots[date].includes(slot)) {
+          slotBtn.classList.add('booked');
+        } else {
+          slotBtn.onclick = () => {
+            document.querySelectorAll('.time-slot').forEach(el => el.classList.remove('selected'));
+            slotBtn.classList.add('selected');
+            selectedTime = slot;
+            confirmBtn.style.display = 'inline-block';
+          };
+        }
+
+        slotsContainer.appendChild(slotBtn);
+      });
+    }
+
+    function confirmBooking() {
+      if (!selectedDate || !selectedTime) return alert("Please select both a date and time.");
+
+      const booked = JSON.parse(localStorage.getItem('bookedSlots') || '{}');
+      if (!booked[selectedDate]) booked[selectedDate] = [];
+      booked[selectedDate].push(selectedTime);
+      localStorage.setItem('bookedSlots', JSON.stringify(booked));
+
+      localStorage.setItem('selectedDate', selectedDate);
+      localStorage.setItem('selectedTime', selectedTime);
+
+      window.location.href = 'confirmation.html';
+    }
   </script>
+
 </body>
 </html>
